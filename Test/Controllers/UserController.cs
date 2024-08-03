@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Test.Database;
 using Test.Models;
 using Test.Entities;
+using Microsoft.EntityFrameworkCore;
+using Test.Repositories;
 
 namespace Test.Controllers
 {
@@ -11,30 +13,35 @@ namespace Test.Controllers
     public class UserController : ControllerBase
     {
         private readonly ApplicationDBContext _dbContext;
-        public UserController(ApplicationDBContext dbContext)
+        private readonly IUserRepository userRepository;
+
+        public UserController(ApplicationDBContext dbContext, IUserRepository userRepository)
         {
             _dbContext = dbContext;
+            this.userRepository = userRepository;
         }
 
         [HttpGet]
-        public IActionResult GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            var allUsers = _dbContext.Users.ToList();
+            var allUsers = await userRepository.GetAllAsync();
             return Ok(allUsers);
         }
 
-        [HttpGet("{id:Guid}")]
-        public IActionResult GetUserById(Guid id)
+        //Altro metodo per inserire una rotta direttamente col verbo REST [HttpGet("{id:Guid}")]
+        [HttpGet]
+        [Route("{id:Guid}")]
+        public async Task<IActionResult> GetUserById(Guid id)
         {
-            var user = _dbContext.Users.Find(id);
+            var user = await userRepository.GetByIdAsync(id);
             if (user is null) return NotFound();
             return Ok(user);
         }
 
         [HttpPost]
-        public IActionResult AddUser(AddUserDto addUserDto)
+        public async Task<IActionResult> AddUser(AddUserDto addUserDto)
         {
-            var userEntity = new User()
+            var userDomain = new User
             {
                 Name = addUserDto.Name,
                 Email = addUserDto.Email,
@@ -42,38 +49,46 @@ namespace Test.Controllers
                 Salary = addUserDto.Salary
             };
 
-            _dbContext.Users.Add(userEntity);
-            _dbContext.SaveChanges();
+            await userRepository.AddUserAsync(userDomain);
 
-            return Ok(userEntity);
+            var userReturn = new User //Sarebbe da rimappare da domain a dto 
+            {
+                Id = userDomain.Id,
+                Name = userDomain.Name,
+                Email = userDomain.Email,
+                Phone = userDomain.Phone,
+                Salary = userDomain.Salary
+            };
+
+            return CreatedAtAction(nameof(GetUserById), new { id = userDomain.Id }, userReturn);
         }
 
         [HttpPut("{id:Guid}")]
-        public IActionResult UpdateUser(Guid id,[FromBody] UpdateUserDto updateUserDto)
+        public async Task<IActionResult> UpdateUser([FromRoute] Guid id,[FromBody] UpdateUserDto updateUserDto)
         {
-            var user = _dbContext.Users.Find(id);
-            if (user is null) return NotFound();
+            //Da dto a domain 
+            var userDomain = new User
+            {
+                Name = updateUserDto.Name,
+                Email = updateUserDto.Email,
+                Phone = updateUserDto.Phone,
+                Salary = updateUserDto.Salary
+            };
 
-            user.Name = updateUserDto.Name;
-            user.Email = updateUserDto.Email;
-            user.Phone = updateUserDto.Phone;
-            user.Salary = updateUserDto.Salary;
+            userDomain = await userRepository.UpdateUserAsync(id, userDomain);
+            if (userDomain is null) return NotFound();
 
-            _dbContext.SaveChanges();
+            //Sarebbe da rimappare da domain a dto 
 
-            return Ok(user);
+            return Ok(userDomain);
         }
 
         [HttpDelete("{id:Guid}")]
-        public IActionResult DeleteUser(Guid id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var user = _dbContext.Users.Find(id);
+            var user = await userRepository.DeleteUserAsync(id);
             if (user is null) return NotFound();
-
-            _dbContext.Users.Remove(user);
-            _dbContext.SaveChanges(); //Salvare sempre le modifiche altrimenti nel DB non persiste
-
-            return Ok();
+            return NoContent();
         }
     }
 }

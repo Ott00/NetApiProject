@@ -1,5 +1,6 @@
  using Microsoft.EntityFrameworkCore;
 using Test.Database;
+using Test.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,12 @@ builder.Services.AddSwaggerGen();
 
 //Database Connection
 builder.Services.AddDbContext<ApplicationDBContext>(options => 
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//Inietto i miei servizi
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+
 
 var app = builder.Build();
 
