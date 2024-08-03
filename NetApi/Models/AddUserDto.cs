@@ -1,6 +1,6 @@
-﻿namespace Test.Models
+﻿namespace NetApi.Models
 {
-    public class UpdateUserDto
+    public class AddUserDto
     {
         public required string Name { get; set; }
         public required string Email { get; set; }

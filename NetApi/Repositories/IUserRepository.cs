@@ -1,7 +1,7 @@
-﻿using Test.Entities;
-using Test.Models;
+﻿using NetApi.Entities;
+using NetApi.Models;
 
-namespace Test.Repositories
+namespace NetApi.Repositories
 {
     public interface IUserRepository
     {

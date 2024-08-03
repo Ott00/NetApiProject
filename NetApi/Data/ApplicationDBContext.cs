@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Test.Entities;
+using NetApi.Entities;
 
-namespace Test.Database
+namespace NetApi.Database
 {
     public class ApplicationDBContext : DbContext
     {

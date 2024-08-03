@@ -1,4 +1,4 @@
-﻿namespace Test.Entities
+﻿namespace NetApi.Entities
 {
     public class User
     {

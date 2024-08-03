@@ -1,6 +1,6 @@
  using Microsoft.EntityFrameworkCore;
-using Test.Database;
-using Test.Repositories;
+using NetApi.Database;
+using NetApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

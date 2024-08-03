@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Test.Database;
-using Test.Entities;
-using Test.Models;
+using NetApi.Database;
+using NetApi.Entities;
+using NetApi.Models;
 
-namespace Test.Repositories
+namespace NetApi.Repositories
 {
     public class UserRepository : IUserRepository
     {

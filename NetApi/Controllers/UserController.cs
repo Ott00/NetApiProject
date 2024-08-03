@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Test.Database;
-using Test.Models;
-using Test.Entities;
+using NetApi.Database;
+using NetApi.Models;
+using NetApi.Entities;
 using Microsoft.EntityFrameworkCore;
-using Test.Repositories;
+using NetApi.Repositories;
 
-namespace Test.Controllers
+namespace NetApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
