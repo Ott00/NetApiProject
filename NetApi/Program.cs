@@ -1,5 +1,6 @@
- using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NetApi.Database;
+using NetApi.Mappings;
 using NetApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +19,8 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 //Inietto i miei servizi
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-
+//Automapper
+builder.Services.AddAutoMapper(typeof(Automapper));
 
 var app = builder.Build();
 

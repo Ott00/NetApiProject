@@ -5,6 +5,7 @@ using NetApi.Models;
 using NetApi.Entities;
 using Microsoft.EntityFrameworkCore;
 using NetApi.Repositories;
+using AutoMapper;
 
 namespace NetApi.Controllers
 {
@@ -14,18 +15,20 @@ namespace NetApi.Controllers
     {
         private readonly ApplicationDBContext _dbContext;
         private readonly IUserRepository userRepository;
+        private readonly IMapper mapper;
 
-        public UserController(ApplicationDBContext dbContext, IUserRepository userRepository)
+        public UserController(ApplicationDBContext dbContext, IUserRepository userRepository, IMapper mapper)
         {
             _dbContext = dbContext;
             this.userRepository = userRepository;
+            this.mapper = mapper;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
             var allUsers = await userRepository.GetAllAsync();
-            return Ok(allUsers);
+            return Ok(mapper.Map<List<UserDto>>(allUsers));
         }
 
         //Altro metodo per inserire una rotta direttamente col verbo REST [HttpGet("{id:Guid}")]
@@ -35,52 +38,25 @@ namespace NetApi.Controllers
         {
             var user = await userRepository.GetByIdAsync(id);
             if (user is null) return NotFound();
-            return Ok(user);
+            return Ok(mapper.Map<UserDto>(user));
         }
 
         [HttpPost]
         public async Task<IActionResult> AddUser(AddUserDto addUserDto)
         {
-            var userDomain = new User
-            {
-                Name = addUserDto.Name,
-                Email = addUserDto.Email,
-                Phone = addUserDto.Phone,
-                Salary = addUserDto.Salary
-            };
-
-            await userRepository.AddUserAsync(userDomain);
-
-            var userReturn = new User //Sarebbe da rimappare da domain a dto 
-            {
-                Id = userDomain.Id,
-                Name = userDomain.Name,
-                Email = userDomain.Email,
-                Phone = userDomain.Phone,
-                Salary = userDomain.Salary
-            };
-
+            var userDomain = mapper.Map<User>(addUserDto);
+            userDomain = await userRepository.AddUserAsync(userDomain);
+            var userReturn = mapper.Map<UserDto>(userDomain);
             return CreatedAtAction(nameof(GetUserById), new { id = userDomain.Id }, userReturn);
         }
 
         [HttpPut("{id:Guid}")]
         public async Task<IActionResult> UpdateUser([FromRoute] Guid id,[FromBody] UpdateUserDto updateUserDto)
         {
-            //Da dto a domain 
-            var userDomain = new User
-            {
-                Name = updateUserDto.Name,
-                Email = updateUserDto.Email,
-                Phone = updateUserDto.Phone,
-                Salary = updateUserDto.Salary
-            };
-
+            var userDomain = mapper.Map<User>(updateUserDto);
             userDomain = await userRepository.UpdateUserAsync(id, userDomain);
             if (userDomain is null) return NotFound();
-
-            //Sarebbe da rimappare da domain a dto 
-
-            return Ok(userDomain);
+            return Ok(mapper.Map<User>(userDomain));
         }
 
         [HttpDelete("{id:Guid}")]
